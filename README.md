@@ -1,2 +1,2 @@
 # application_development
-IST group project
+This is the read me for the python group project.
