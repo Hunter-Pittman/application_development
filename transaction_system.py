@@ -2,7 +2,8 @@ import os.path
 from os import path
 import sys
 import sqlite3
-from datetime import datetime
+import datetime
+
 
 conn = sqlite3.connect('transaction.db')
 c = conn.cursor()
@@ -14,21 +15,24 @@ def db_check():
         c.execute('''SELECT count(name) FROM sqlite_master WHERE type='table' AND name='sales' ''')
         if c.fetchone()[0] == 1:
             print("Sales table has been found!")
+            print("All systems  [OK]")
         else:
             print("No sales table has been found. Generating....")
-            c.execute('''CREATE TABLE sales (first_name TEXT NOT NULL, last_name TEXT NOT NULL, burger TEXT NOT NULL, total_bill REAL NOT NULL, current_date DATE NOT NULL, current_time TIME NOT NULL)''')
+            c.execute('''CREATE TABLE sales (first_name TEXT NOT NULL, last_name TEXT NOT NULL, burger TEXT NOT NULL, total_bill DECIMAL NOT NULL, order_stamp timestamp NOT NULL)''')
             print("Complete!")
     else:
         print("Somehting is seriously broke, check with your app dev!")
-        return False 
+        exit("Critical Error in DB detection or generation...")
 
 def new_order(first_name, last_name, burger, total_bill):
-    current_date = datetime.date(datetime.now())
-    current_time = datetime.time(datetime.now())
+    current_timestamp = datetime.datetime.now()
 
-    query = "INSERT INTO sales VALUES ('" + first_name + "', '" + last_name + "', '" + burger + "', '" + total_bill + "', '" + str(current_date) + "', '" + str(current_time) + "')"
-    c.execute(query)
+    query = "INSERT INTO sales VALUES (?, ?, ?, ?, ?)"
+
+    order_data = (first_name, last_name, burger, total_bill, current_timestamp)
+    c.execute(query, order_data)
     conn.commit()
+
 
 def display_menu():
     print(30 * "-" , "MENU" , 30 * "-")
@@ -82,7 +86,7 @@ def main():
             first_name = remove_whitespaces(first_name)
             last_name = input("Enter the customers last name: ")
             last_name = remove_whitespaces(last_name)
-            new_order(first_name, last_name, burger, str(total_bill))
+            new_order(first_name, last_name, burger, total_bill)
         elif choice==2:
             print("Your GF said she didn't want anything burger  has been selected... generating order")
             burger = "GF"
@@ -91,7 +95,7 @@ def main():
             first_name = remove_whitespaces(first_name)
             last_name = input("Enter the customers last name: ")
             last_name = remove_whitespaces(last_name)
-            new_order(first_name, last_name, burger, str(total_bill))
+            new_order(first_name, last_name, burger, total_bill)
         elif choice==3:
             print("All American Burger has been selected... generating order")
             burger = "American"
@@ -100,7 +104,7 @@ def main():
             first_name = remove_whitespaces(first_name)
             last_name = input("Enter the customers last name: ")
             last_name = remove_whitespaces(last_name)
-            new_order(first_name, last_name, burger, str(total_bill))
+            new_order(first_name, last_name, burger, total_bill)
         elif choice==4:
             print("Western Burger has been selected... generating order")
             burger = "Western"
@@ -109,7 +113,7 @@ def main():
             first_name = remove_whitespaces(first_name)
             last_name = input("Enter the customers last name: ")
             last_name = remove_whitespaces(last_name)
-            new_order(first_name, last_name, burger, str(total_bill))
+            new_order(first_name, last_name, burger, total_bill)
         elif choice==5:
             print("Breakfeast for Dinner Burger has been selected... generating order")
             burger = "Breakfeast"
@@ -118,7 +122,7 @@ def main():
             first_name = remove_whitespaces(first_name)
             last_name = input("Enter the customers last name: ")
             last_name = remove_whitespaces(last_name)
-            new_order(first_name, last_name, burger, str(total_bill))
+            new_order(first_name, last_name, burger, total_bill)
         elif choice==6:
             print("El Diablo Burger has been selected... generating order")
             burger = "Diablo"
@@ -127,7 +131,7 @@ def main():
             first_name = remove_whitespaces(first_name)
             last_name = input("Enter the customers last name: ")
             last_name = remove_whitespaces(last_name)
-            new_order(first_name, last_name, burger, str(total_bill))
+            new_order(first_name, last_name, burger, total_bill)
         elif choice==7:
             print("Displaying stats and ending program")
             loop=False
