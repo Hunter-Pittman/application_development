@@ -35,7 +35,11 @@ def new_order(first_name, last_name, burger, total_bill):
 
 # Utility Functions
 def remove_whitespaces(string): 
-    return string.replace(" ", "") 
+    return string.replace(" ", "")
+
+def name_reconstruction(first_name, last_name):
+    name =  first_name.capitalize() + " " + last_name.capitalize()
+    return name
 
 # Front Facing Functions
 def display_menu():
@@ -54,7 +58,7 @@ def client30():
     print("####30th client of the day####")
     current_date = datetime.datetime.now().date()
     current_date_plus1 = datetime.date.today() + datetime.timedelta(days=1)
-    query = "SELECT * FROM SALES WHERE order_stamp >= ? AND order_stamp < ?"
+    query = "SELECT * FROM sales WHERE order_stamp >= ? AND order_stamp < ?"
 
     date_fill = (current_date, current_date_plus1)
     c.execute(query, date_fill)
@@ -66,11 +70,40 @@ def client30():
     else:
         print("The 30th client of the day is: ", client[0], client[1])
 
+def longest_name():
+    print("####Client with the longest name####")
+    query = "SELECT first_name, last_name FROM sales"
+
+    c.execute(query)
+    results = c.fetchall()
+    full_name = []
+    for tuples in results:
+        processed_name = name_reconstruction(tuples[0], tuples[1])
+        full_name.append(processed_name)
+    
+    full_name.sort(key=len, reverse=True)
+    longest_name_length = len(full_name[0])
+
+    final_name_list = []
+    for name in full_name:
+        if longest_name_length == len(name):
+            final_name_list.append(name)
+        else:
+            pass
+    
+    if len(final_name_list) > 1:
+        print("There are multiple names that are the longest, here is the list: ")
+        for name in final_name_list:
+            print(name)
+    else:
+        print("There were no ties for longest name, listing only entry: ")
+        print(final_name_list[0])
     
 
 
 def ending_program():
     client30()
+    longest_name()
     print("Bye, Bye!")
 
 def banner():
