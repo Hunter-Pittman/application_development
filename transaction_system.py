@@ -4,10 +4,11 @@ import sys
 import sqlite3
 import datetime
 
-
+# Initial DB creation
 conn = sqlite3.connect('transaction.db')
 c = conn.cursor()
 
+# DB Self Check
 def db_check():
     TransDB_check = path.exists("transaction.db")
     if TransDB_check == True:
@@ -18,22 +19,25 @@ def db_check():
             print("All systems  [OK]")
         else:
             print("No sales table has been found. Generating....")
-            c.execute('''CREATE TABLE sales (first_name TEXT NOT NULL, last_name TEXT NOT NULL, burger TEXT NOT NULL, total_bill DECIMAL NOT NULL, order_stamp timestamp NOT NULL)''')
+            c.execute('''CREATE TABLE sales (first_name TEXT NOT NULL, last_name TEXT NOT NULL, burger TEXT NOT NULL, total_bill DECIMAL NOT NULL, order_stamp timestamp DEFAULT CURRENT_TIMESTAMP)''')
             print("Complete!")
     else:
         print("Somehting is seriously broke, check with your app dev!")
         exit("Critical Error in DB detection or generation...")
 
+# SQL Query Functions
 def new_order(first_name, last_name, burger, total_bill):
-    current_timestamp = datetime.datetime.now()
+    query = "INSERT INTO sales (first_name, last_name, burger, total_bill) VALUES (?, ?, ?, ?)"
 
-    query = "INSERT INTO sales VALUES (?, ?, ?, ?, ?)"
-
-    order_data = (first_name, last_name, burger, total_bill, current_timestamp)
+    order_data = (first_name, last_name, burger, total_bill)
     c.execute(query, order_data)
     conn.commit()
 
+# Utility Functions
+def remove_whitespaces(string): 
+    return string.replace(" ", "") 
 
+# Front Facing Functions
 def display_menu():
     print(30 * "-" , "MENU" , 30 * "-")
     print("(1) The Impulse Burger   Price:[$12.50]")
@@ -44,13 +48,30 @@ def display_menu():
     print("(6) El Diablo Burger   Price:[$11.00]")
     print("(7) End the Day and Display Stats")
     print(67 * "-")
-    
-def ending_program():
-    print("Bye, Bye!")
-    exit
 
-def remove_whitespaces(string): 
-    return string.replace(" ", "") 
+
+def client30():
+    print("####30th client of the day####")
+    current_date = datetime.datetime.now().date()
+    current_date_plus1 = datetime.date.today() + datetime.timedelta(days=1)
+    query = "SELECT * FROM SALES WHERE order_stamp >= ? AND order_stamp < ?"
+
+    date_fill = (current_date, current_date_plus1)
+    c.execute(query, date_fill)
+    results = c.fetchall()
+    try:
+        client = results[29]
+    except (IndexError):
+        print("There is no client 30.")
+    else:
+        print("The 30th client of the day is: ", client[0], client[1])
+
+    
+
+
+def ending_program():
+    client30()
+    print("Bye, Bye!")
 
 def banner():
     print(
@@ -67,14 +88,12 @@ def banner():
     )
     print("Version: 1.0a")
 
-
-def main():
+if __name__ == "__main__":
     banner()
     db_check()
     print("Welcome to the burger joint transactional system!")
-    print("System Menu:")
-    loop=True      
-    while loop:
+    print("System Menu:")     
+    while True:
         display_menu()
         choice = int(input("Enter your choice [1-7]: "))
         
@@ -134,10 +153,11 @@ def main():
             new_order(first_name, last_name, burger, total_bill)
         elif choice==7:
             print("Displaying stats and ending program")
-            loop=False
             ending_program()
+            break
         else:
             print("Wrong option selection. Enter any key to try again..")
 
-main()
+
+
 conn.close()
