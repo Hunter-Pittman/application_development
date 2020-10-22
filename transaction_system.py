@@ -1,10 +1,9 @@
-import os.path
 from os import path
 import sys
 import sqlite3
 import datetime
 
-# Initial DB creation
+# Initial DB creation note: Won't overwrite and existing db of the same name
 conn = sqlite3.connect('transaction.db')
 c = conn.cursor()
 
@@ -25,15 +24,7 @@ def db_check():
         print("Somehting is seriously broke, check with your app dev!")
         exit("Critical Error in DB detection or generation...")
 
-# SQL Query Functions
-def new_order(first_name, last_name, burger, total_bill):
-    query = "INSERT INTO sales (first_name, last_name, burger, total_bill) VALUES (?, ?, ?, ?)"
-
-    order_data = (first_name, last_name, burger, total_bill)
-    c.execute(query, order_data)
-    conn.commit()
-
-# Utility Functions
+# Utility functions, used for simplifying code
 def remove_whitespaces(string): 
     result = string.replace(" ", "")
     return result
@@ -41,20 +32,18 @@ def remove_whitespaces(string):
 def name_reconstruction(first_name, last_name):
     result =  first_name.capitalize() + " " + last_name.capitalize()
     return result
+# END
 
-# Front Facing Functions
-def display_menu():
-    print(30 * "-" , "MENU" , 30 * "-")
-    print("(1) The Impulse Burger   Price:[$12.50]")
-    print("(2) Your GF said she didn't want anything burger   Price:[$13.00]")
-    print("(3) All American Burger   Price:[$9.50]")
-    print("(4) Western Burger   Price:[$10.00]")
-    print("(5) Breakfeast for Dinner Burger   Price:[$12.75]")
-    print("(6) El Diablo Burger   Price:[$11.00]")
-    print("(7) End the Day and Display Stats")
-    print(67 * "-")
+# Order creation function
+def new_order(first_name, last_name, burger, total_bill):
+    query = "INSERT INTO sales (first_name, last_name, burger, total_bill) VALUES (?, ?, ?, ?)"
 
+    order_data = (first_name, last_name, burger, total_bill)
+    c.execute(query, order_data)
+    conn.commit()
+# END
 
+# Ending Functions
 def client30():
     print("####30th client of the day####")
     current_date = datetime.datetime.now().date()
@@ -99,8 +88,9 @@ def longest_name():
     else:
         print("There were no ties for longest name, listing only entry: ")
         print(final_name_list[0])
+# END
     
-
+# Static Limits checked at every menu cycle
 def client_limit():
     current_date = datetime.datetime.now().date()
     current_date_plus1 = datetime.date.today() + datetime.timedelta(days=1)
@@ -111,18 +101,33 @@ def client_limit():
     results = c.fetchall()
     clients_processed = len(results)
 
-    if clients_processed > 1:
+    if clients_processed > 100:
         print("You have reached the 100 clients that are permissible, displaying stats and ending program...")
         ending_program()
         return True
     else:
         print("Clients processed today: ", clients_processed)
 
+def time_limit():
+    current_time = datetime.datetime.now().time()
+    start_time = datetime.time(hour=10, minute=0, second=0, microsecond=0)
+    stop_time = datetime.time(hour=22, minute=0, second=0, microsecond=0)
+
+    if current_time <= start_time or current_time >= stop_time:
+        print("Time condition violated... ending program")
+        return True
+    else:
+        print("The time is currently ", current_time)
+# END
+
+# Function should be called when gracefully terminating the program
 def ending_program():
     client30()
     longest_name()
     print("Bye, Bye!")
+# END
 
+# Menu Functions
 def banner():
     print(
     '''        
@@ -137,13 +142,30 @@ def banner():
     '''
     )
     print("Version: 1.0a")
+    print("Welcome to the burger joint transactional system!")    
+
+def display_menu():
+    print(30 * "-" , "MENU" , 30 * "-")
+    print("(1) The Impulse Burger   Price:[$12.50]")
+    print("(2) Your GF said she didn't want anything burger   Price:[$13.00]")
+    print("(3) All American Burger   Price:[$9.50]")
+    print("(4) Western Burger   Price:[$10.00]")
+    print("(5) Breakfeast for Dinner Burger   Price:[$12.75]")
+    print("(6) El Diablo Burger   Price:[$11.00]")
+    print("(7) End the Day and Display Stats")
+    print(67 * "-")
+# END
 
 if __name__ == "__main__":
     banner()
     db_check()
-    print("Welcome to the burger joint transactional system!")    
     while True:
         if client_limit():
+            break
+        else:
+            pass
+
+        if time_limit():
             break
         else:
             pass
@@ -212,7 +234,5 @@ if __name__ == "__main__":
             break
         else:
             print("Wrong option selection. Enter any key to try again..")
-
-
 
 conn.close()
