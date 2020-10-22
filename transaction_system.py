@@ -19,7 +19,7 @@ def db_check():
             print("All systems  [OK]")
         else:
             print("No sales table has been found. Generating....")
-            c.execute('''CREATE TABLE sales (first_name TEXT NOT NULL, last_name TEXT NOT NULL, burger TEXT NOT NULL, total_bill DECIMAL NOT NULL, order_stamp timestamp DEFAULT CURRENT_TIMESTAMP)''')
+            c.execute('''CREATE TABLE sales (first_name TEXT NOT NULL, last_name TEXT NOT NULL, burger TEXT NOT NULL, total_bill DECIMAL NOT NULL, order_stamp DATE DEFAULT (datetime('now','localtime')))''')
             print("Complete!")
     else:
         print("Somehting is seriously broke, check with your app dev!")
@@ -35,11 +35,12 @@ def new_order(first_name, last_name, burger, total_bill):
 
 # Utility Functions
 def remove_whitespaces(string): 
-    return string.replace(" ", "")
+    result = string.replace(" ", "")
+    return result
 
 def name_reconstruction(first_name, last_name):
-    name =  first_name.capitalize() + " " + last_name.capitalize()
-    return name
+    result =  first_name.capitalize() + " " + last_name.capitalize()
+    return result
 
 # Front Facing Functions
 def display_menu():
@@ -58,7 +59,7 @@ def client30():
     print("####30th client of the day####")
     current_date = datetime.datetime.now().date()
     current_date_plus1 = datetime.date.today() + datetime.timedelta(days=1)
-    query = "SELECT * FROM sales WHERE order_stamp >= ? AND order_stamp < ?"
+    query = "SELECT first_name, last_name FROM sales WHERE order_stamp >= ? AND order_stamp < ?"
 
     date_fill = (current_date, current_date_plus1)
     c.execute(query, date_fill)
@@ -68,7 +69,7 @@ def client30():
     except (IndexError):
         print("There is no client 30.")
     else:
-        print("The 30th client of the day is: ", client[0], client[1])
+        print("The 30th client of the day is: ", name_reconstruction(client[0], client[1]))
 
 def longest_name():
     print("####Client with the longest name####")
@@ -100,6 +101,22 @@ def longest_name():
         print(final_name_list[0])
     
 
+def client_limit():
+    current_date = datetime.datetime.now().date()
+    current_date_plus1 = datetime.date.today() + datetime.timedelta(days=1)
+    query = "SELECT first_name, last_name FROM sales WHERE order_stamp >= ? AND order_stamp < ?"
+
+    date_fill = (current_date, current_date_plus1)
+    c.execute(query, date_fill)
+    results = c.fetchall()
+    clients_processed = len(results)
+
+    if clients_processed > 1:
+        print("You have reached the 100 clients that are permissible, displaying stats and ending program...")
+        ending_program()
+        return True
+    else:
+        print("Clients processed today: ", clients_processed)
 
 def ending_program():
     client30()
@@ -108,7 +125,7 @@ def ending_program():
 
 def banner():
     print(
-        '''        
+    '''        
     ____                                   _       _       _     _______                             _   _                _____           _                 
     |  _ \                                 | |     (_)     | |   |__   __|                           | | (_)              / ____|         | |                
     | |_) |_   _ _ __ __ _  ___ _ __       | | ___  _ _ __ | |_     | |_ __ __ _ _ __  ___  __ _  ___| |_ _  ___  _ __   | (___  _   _ ___| |_ ___ _ __ ___  
@@ -124,9 +141,14 @@ def banner():
 if __name__ == "__main__":
     banner()
     db_check()
-    print("Welcome to the burger joint transactional system!")
-    print("System Menu:")     
+    print("Welcome to the burger joint transactional system!")    
     while True:
+        if client_limit():
+            break
+        else:
+            pass
+
+        print("System Menu:") 
         display_menu()
         choice = int(input("Enter your choice [1-7]: "))
         
