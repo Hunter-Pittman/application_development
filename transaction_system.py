@@ -19,18 +19,18 @@ def main():
         else:
             pass
 
-        """
+        '''
         if time_limit():
             break
         else:
             pass
-        """
+        '''
 
         print("System Menu:")
         display_menu()
-        choice = int(input("Enter your choice [1-7]: "))
+        choice = input("Enter your choice [1-7]: ")
 
-        if choice == 1:
+        if choice == "1":
             print("The Impulse Burger has been selected... generating order")
             burger = "impulse"
             total_bill = 12.50
@@ -39,7 +39,7 @@ def main():
             last_name = input("Enter the customers last name: ")
             last_name = remove_whitespaces(last_name)
             new_order(first_name, last_name, burger, total_bill)
-        elif choice == 2:
+        elif choice == "2":
             print(
                 "Your GF said she didn't want anything burger  has been selected... generating order"
             )
@@ -50,7 +50,7 @@ def main():
             last_name = input("Enter the customers last name: ")
             last_name = remove_whitespaces(last_name)
             new_order(first_name, last_name, burger, total_bill)
-        elif choice == 3:
+        elif choice == "3":
             print("All American Burger has been selected... generating order")
             burger = "American"
             total_bill = 9.50
@@ -59,7 +59,7 @@ def main():
             last_name = input("Enter the customers last name: ")
             last_name = remove_whitespaces(last_name)
             new_order(first_name, last_name, burger, total_bill)
-        elif choice == 4:
+        elif choice == "4":
             print("Western Burger has been selected... generating order")
             burger = "Western"
             total_bill = 10.00
@@ -68,7 +68,7 @@ def main():
             last_name = input("Enter the customers last name: ")
             last_name = remove_whitespaces(last_name)
             new_order(first_name, last_name, burger, total_bill)
-        elif choice == 5:
+        elif choice == "5":
             print("Breakfeast for Dinner Burger has been selected... generating order")
             burger = "Breakfeast"
             total_bill = 12.75
@@ -77,7 +77,7 @@ def main():
             last_name = input("Enter the customers last name: ")
             last_name = remove_whitespaces(last_name)
             new_order(first_name, last_name, burger, total_bill)
-        elif choice == 6:
+        elif choice == "6":
             print("El Diablo Burger has been selected... generating order")
             burger = "Diablo"
             total_bill = 11.00
@@ -86,7 +86,7 @@ def main():
             last_name = input("Enter the customers last name: ")
             last_name = remove_whitespaces(last_name)
             new_order(first_name, last_name, burger, total_bill)
-        elif choice == 7:
+        elif choice == "7":
             print("Displaying stats and ending program")
             ending_program()
             break
@@ -131,25 +131,37 @@ def name_reconstruction(first_name, last_name):
 
 # Order creation function
 def new_order(first_name, last_name, burger, total_bill):
-    query = "INSERT INTO sales (first_name, last_name, burger, total_bill) VALUES (?, ?, ?, ?)"
+    query = "INSERT INTO sales (first_name, last_name, burger, total_bill) VALUES (?, ?, ?, ?);"
 
     order_data = (first_name, last_name, burger, total_bill)
     c.execute(query, order_data)
     conn.commit()
+# END
 
+# Order Retrival Function
+
+
+def select_todays_orders(column):
+    current_date = datetime.datetime.now().date()
+    current_date_plus1 = datetime.date.today() + datetime.timedelta(days=1)
+    unmodified_query = "SELECT %s FROM sales WHERE order_stamp >= ? AND order_stamp < ?"
+
+    modified_query = (unmodified_query % column)
+
+    data_fill = (current_date, current_date_plus1)
+    c.execute(modified_query, data_fill)
+    results = c.fetchall()
+    return results
 
 # END
 
 # Ending Functions
+
+
 def client30():
     print("####30th client of the day####")
-    current_date = datetime.datetime.now().date()
-    current_date_plus1 = datetime.date.today() + datetime.timedelta(days=1)
-    query = "SELECT first_name, last_name FROM sales WHERE order_stamp >= ? AND order_stamp < ?"
+    results = select_todays_orders("first_name, last_name")
 
-    date_fill = (current_date, current_date_plus1)
-    c.execute(query, date_fill)
-    results = c.fetchall()
     try:
         client = results[29]
     except (IndexError):
@@ -163,43 +175,39 @@ def client30():
 
 def longest_name():
     print("####Client with the longest name####")
-    query = "SELECT first_name, last_name FROM sales"
 
-    c.execute(query)
-    results = c.fetchall()
-    full_name = []
-    for tuples in results:
-        processed_name = name_reconstruction(tuples[0], tuples[1])
-        full_name.append(processed_name)
+    results = select_todays_orders("first_name, last_name")
 
-    full_name.sort(key=len, reverse=True)
-    longest_name_length = len(full_name[0])
+    try:
+        full_name = []
+        for tuples in results:
+            processed_name = name_reconstruction(tuples[0], tuples[1])
+            full_name.append(processed_name)
 
-    final_name_list = []
-    for name in full_name:
-        if longest_name_length == len(name):
-            final_name_list.append(name)
+        full_name.sort(key=len, reverse=True)
+        longest_name_length = len(full_name[0])
+
+        final_name_list = []
+        for name in full_name:
+            if longest_name_length == len(name):
+                final_name_list.append(name)
+            else:
+                pass
+
+        if len(final_name_list) > 1:
+            print("There are multiple names that are the longest, here is the list: ")
+            for name in final_name_list:
+                print(name)
         else:
-            pass
-
-    if len(final_name_list) > 1:
-        print("There are multiple names that are the longest, here is the list: ")
-        for name in final_name_list:
-            print(name)
-    else:
-        print("There were no ties for longest name, listing only entry: ")
-        print(final_name_list[0])
+            print("There were no ties for longest name, listing only entry: ")
+            print(final_name_list[0])
+    except:
+        print("There have been no clients yet")
 
 
 def top_burgers():
-    print("####Top three burgers of the day####")
-    current_date = datetime.datetime.now().date()
-    current_date_plus1 = datetime.date.today() + datetime.timedelta(days=1)
-    query = "SELECT burger FROM sales WHERE order_stamp >= ? AND order_stamp < ?"
-
-    date_fill = (current_date, current_date_plus1)
-    c.execute(query, date_fill)
-    results = c.fetchall()
+    print("####Top three burgers####")
+    results = select_todays_orders("burger")
 
     count = 0
     burger_list = []
@@ -207,8 +215,8 @@ def top_burgers():
         burger_list.append(item[count])
 
     bugrer_tally = collections.Counter(burger_list)
-
     best_burger = bugrer_tally.most_common(3)
+
     while True:
         try:
             print('#1 Burger: ', str(best_burger[0][0]))
@@ -227,19 +235,43 @@ def top_burgers():
         except:
             print("Sorry there are only two burger types that were sold.")
             break
+        break
+
+
+def top_clients():
+    print('####Top three best clients####')
+    results = select_todays_orders("first_name, last_name, total_bill")
+
+    list_rebuild = []
+
+    for tuples in results:
+        processed_name = name_reconstruction(tuples[0], tuples[1])
+        list_rebuild.append((processed_name, tuples[2]))
+
+    client_total = {}
+
+    for record in list_rebuild:
+        if record[0] in client_total:
+            entry_value = client_total[record[0]]
+            updated_value = entry_value + record[1]
+            client_total[record[0]] = updated_value
+        else:
+            client_total[record[0]] = record[1]
+
+    sort_clients = sorted(client_total.items(),
+                          key=lambda x: x[1], reverse=True)
+
+    for i in sort_clients:
+        print(i[0] + ": " + str(i[1]))
 
 
 # END
 
 # Static Limits checked at every menu cycle
-def client_limit():
-    current_date = datetime.datetime.now().date()
-    current_date_plus1 = datetime.date.today() + datetime.timedelta(days=1)
-    query = "SELECT first_name, last_name FROM sales WHERE order_stamp >= ? AND order_stamp < ?"
 
-    date_fill = (current_date, current_date_plus1)
-    c.execute(query, date_fill)
-    results = c.fetchall()
+
+def client_limit():
+    results = select_todays_orders("first_name, last_name")
     clients_processed = len(results)
 
     if clients_processed > 100:
@@ -271,6 +303,7 @@ def ending_program():
     client30()
     longest_name()
     top_burgers()
+    top_clients()
     print("Bye, Bye!")
 
 
