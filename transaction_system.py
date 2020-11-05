@@ -243,27 +243,28 @@ def top_clients():
     results = select_todays_orders("first_name, last_name, total_bill")
 
     list_rebuild = []
+    try:
+        for tuples in results:
+            processed_name = name_reconstruction(tuples[0], tuples[1])
+            list_rebuild.append((processed_name, tuples[2]))
 
-    for tuples in results:
-        processed_name = name_reconstruction(tuples[0], tuples[1])
-        list_rebuild.append((processed_name, tuples[2]))
+        client_total = {}
 
-    client_total = {}
+        for record in list_rebuild:
+            if record[0] in client_total:
+                entry_value = client_total[record[0]]
+                updated_value = entry_value + record[1]
+                client_total[record[0]] = updated_value
+            else:
+                client_total[record[0]] = record[1]
 
-    for record in list_rebuild:
-        if record[0] in client_total:
-            entry_value = client_total[record[0]]
-            updated_value = entry_value + record[1]
-            client_total[record[0]] = updated_value
-        else:
-            client_total[record[0]] = record[1]
+        sort_clients = sorted(client_total.items(),
+                              key=lambda x: x[1], reverse=True)
 
-    sort_clients = sorted(client_total.items(),
-                          key=lambda x: x[1], reverse=True)
-
-    for i in sort_clients:
-        print(i[0] + ": " + str(i[1]))
-
+        for i in sort_clients:
+            print(i[0] + ": " + str(i[1]))
+    except:
+        print("Sorry no sales have been made yet today")
 
 # END
 
