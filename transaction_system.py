@@ -5,7 +5,7 @@ import datetime
 import collections
 
 
-# Initial DB creation note: Won't overwrite and existing db of the same name
+# Initial DB creation note: Won't overwrite an existing db of the same name
 conn = sqlite3.connect("transaction.db")
 c = conn.cursor()
 
@@ -202,7 +202,7 @@ def longest_name():
             print("There were no ties for longest name, listing only entry: ")
             print(final_name_list[0])
     except:
-        print("There have been no clients yet")
+        print("There have been no sales today!")
 
 
 def top_burgers():
@@ -221,7 +221,7 @@ def top_burgers():
         try:
             print('#1 Burger: ', str(best_burger[0][0]))
         except:
-            print("Sorry no burgers have been purchased today!")
+            print("There have been no sales today")
             break
 
         try:
@@ -242,29 +242,76 @@ def top_clients():
     print('####Top three best clients####')
     results = select_todays_orders("first_name, last_name, total_bill")
 
+    if len(results) == 0:
+        print("There have been no sales today!")
+
     list_rebuild = []
-    try:
-        for tuples in results:
-            processed_name = name_reconstruction(tuples[0], tuples[1])
-            list_rebuild.append((processed_name, tuples[2]))
+    for tuples in results:
+        processed_name = name_reconstruction(tuples[0], tuples[1])
+        list_rebuild.append((processed_name, tuples[2]))
 
-        client_total = {}
+    client_total = {}
 
-        for record in list_rebuild:
-            if record[0] in client_total:
-                entry_value = client_total[record[0]]
-                updated_value = entry_value + record[1]
-                client_total[record[0]] = updated_value
-            else:
-                client_total[record[0]] = record[1]
+    for record in list_rebuild:
+        if record[0] in client_total:
+            entry_value = client_total[record[0]]
+            updated_value = entry_value + record[1]
+            client_total[record[0]] = updated_value
+        else:
+            client_total[record[0]] = record[1]
 
-        sort_clients = sorted(client_total.items(),
-                              key=lambda x: x[1], reverse=True)
+    sort_clients = sorted(client_total.items(),
+                          key=lambda x: x[1], reverse=True)
 
-        for i in sort_clients:
-            print(i[0] + ": " + str(i[1]))
-    except:
-        print("Sorry no sales have been made yet today")
+    for i in sort_clients:
+        print(i[0] + ": " + str(i[1]))
+
+
+def second_lowest_sale():
+    print('####Second Lowest Sale####')
+    results = select_todays_orders("first_name, last_name, total_bill")
+
+    if len(results) == 0:
+        print("There have been no sales today!")
+
+    list_rebuild = []
+    for tuples in results:
+        processed_name = name_reconstruction(tuples[0], tuples[1])
+        list_rebuild.append((processed_name, tuples[2]))
+
+    client_total = {}
+
+    for record in list_rebuild:
+        if record[0] in client_total:
+            entry_value = client_total[record[0]]
+            updated_value = entry_value + record[1]
+            client_total[record[0]] = updated_value
+        else:
+            client_total[record[0]] = record[1]
+
+    sort_clients = sorted(client_total.items(),
+                          key=lambda x: x[1], reverse=False)
+
+    print("Name and total of second lowest sale: ",
+          sort_clients[1][0], sort_clients[1][1])
+
+
+def todays_total_sales():
+    print('####Todays total sales####')
+    results = select_todays_orders("total_bill")
+    todays_total = 0
+
+    sales_list = []
+    for x in results:
+        sales_list.append(x[0])
+
+    for y in sales_list:
+        todays_total = todays_total + y
+    if todays_total > 0:
+        print("Todays total earnings: ", todays_total)
+    else:
+        print("There have been no sales today!")
+
 
 # END
 
@@ -305,6 +352,8 @@ def ending_program():
     longest_name()
     top_burgers()
     top_clients()
+    todays_total_sales()
+    second_lowest_sale()
     print("Bye, Bye!")
 
 
