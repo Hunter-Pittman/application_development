@@ -160,7 +160,7 @@ def select_todays_orders(column):
 
 
 def client30():
-    print("####30th client of the day####")
+    print("\n####30th client of the day####")
     results = select_todays_orders("first_name, last_name")
 
     try:
@@ -175,7 +175,7 @@ def client30():
 
 
 def longest_name():
-    print("####Client with the longest name####")
+    print("\n####Client with the longest name####")
 
     results = select_todays_orders("first_name, last_name")
 
@@ -207,7 +207,7 @@ def longest_name():
 
 
 def top_burgers():
-    print("####Top three burgers####")
+    print("\n####Top three burgers####")
     results = select_todays_orders("burger")
 
     count = 0
@@ -240,7 +240,7 @@ def top_burgers():
 
 
 def top_clients():
-    print('####Top three best clients####')
+    print('\n####Top three best clients####')
     results = select_todays_orders("first_name, last_name, total_bill")
 
     if len(results) == 0:
@@ -263,13 +263,22 @@ def top_clients():
 
     sort_clients = sorted(client_total.items(),
                           key=lambda x: x[1], reverse=True)
-
-    for i in sort_clients:
-        print(i[0] + ": " + str(i[1]))
-
-
+    try:
+        print(list(sort_clients)[0][0] + ": " + str(list(sort_clients)[0][1]))
+    except:
+        print("There have been no sales today!")
+    try:
+        print(list(sort_clients)[1][0] + ": " + str(list(sort_clients)[1][1]))
+    except:
+        print("Only one client today!")
+    try:
+        print(list(sort_clients)[2][0] + ": " + str(list(sort_clients)[2][1]))
+    except:
+        print("Only two clients today!")
+    
+    
 def second_lowest_sale():
-    print('####Second Lowest Sale####')
+    print('\n####Second Lowest Sale####')
     results = select_todays_orders("first_name, last_name, total_bill")
 
     if len(results) == 0:
@@ -298,7 +307,7 @@ def second_lowest_sale():
 
 
 def todays_total_sales():
-    print('####Todays total sales####')
+    print('\n####Todays total sales####')
     results = select_todays_orders("total_bill")
     todays_total = 0
 
@@ -329,10 +338,12 @@ def best_hour_sales():
             processed_values[string_to_hour] = record[1]
 
     sort_money = sorted(processed_values.items(),
-                        key=lambda x: x[1], reverse=False)
+                        key=lambda x: x[1], reverse=True)
 
-    print("The hour of the day with the most sales is: ",
-          str(sort_money[1][0]) + ":00")
+    try:
+        print("The hour of the day with the most sales is: ", str(sort_money[0][0]) + ":00")
+    except:
+        print("Sorry no sales for today!")
 
 
 # END
