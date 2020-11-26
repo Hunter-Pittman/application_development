@@ -21,6 +21,7 @@ def main():
 
         '''
         if time_limit():
+            ending_program()
             break
         else:
             pass
@@ -313,6 +314,27 @@ def todays_total_sales():
         print("There have been no sales today!")
 
 
+def best_hour_sales():
+    print('\n####Best hour for sales####')
+    results = select_todays_orders("order_stamp, total_bill")
+
+    processed_values = {}
+    for record in results:
+        string_to_hour = datetime.datetime.strptime(
+            record[0], '%Y-%m-%d %H:%M:%S').hour
+
+        if string_to_hour in processed_values:
+            processed_values[string_to_hour] = processed_values[string_to_hour] + record[1]
+        else:
+            processed_values[string_to_hour] = record[1]
+
+    sort_money = sorted(processed_values.items(),
+                        key=lambda x: x[1], reverse=False)
+
+    print("The hour of the day with the most sales is: ",
+          str(sort_money[1][0]) + ":00")
+
+
 # END
 
 # Static Limits checked at every menu cycle
@@ -354,6 +376,7 @@ def ending_program():
     top_clients()
     todays_total_sales()
     second_lowest_sale()
+    best_hour_sales()
     print("Bye, Bye!")
 
 
@@ -362,15 +385,15 @@ def ending_program():
 # Menu Functions
 def banner():
     print(
-        """        
-    ____                                   _       _       _     _______                             _   _                _____           _                 
-    |  _ \                                 | |     (_)     | |   |__   __|                           | | (_)              / ____|         | |                
-    | |_) |_   _ _ __ __ _  ___ _ __       | | ___  _ _ __ | |_     | |_ __ __ _ _ __  ___  __ _  ___| |_ _  ___  _ __   | (___  _   _ ___| |_ ___ _ __ ___  
-    |  _ <| | | | '__/ _` |/ _ \ '__|  _   | |/ _ \| | '_ \| __|    | | '__/ _` | '_ \/ __|/ _` |/ __| __| |/ _ \| '_ \   \___ \| | | / __| __/ _ \ '_ ` _ \ 
+        """
+    ____                                   _       _       _     _______                             _   _                _____           _
+    |  _ \                                 | |     (_)     | |   |__   __|                           | | (_)              / ____|         | |
+    | |_) |_   _ _ __ __ _  ___ _ __       | | ___  _ _ __ | |_     | |_ __ __ _ _ __  ___  __ _  ___| |_ _  ___  _ __   | (___  _   _ ___| |_ ___ _ __ ___
+    |  _ <| | | | '__/ _` |/ _ \ '__|  _   | |/ _ \| | '_ \| __|    | | '__/ _` | '_ \/ __|/ _` |/ __| __| |/ _ \| '_ \   \___ \| | | / __| __/ _ \ '_ ` _ \
     | |_) | |_| | | | (_| |  __/ |    | |__| | (_) | | | | | |_     | | | | (_| | | | \__ \ (_| | (__| |_| | (_) | | | |  ____) | |_| \__ \ ||  __/ | | | | |
     |____/ \__,_|_|  \__, |\___|_|     \____/ \___/|_|_| |_|\__|    |_|_|  \__,_|_| |_|___/\__,_|\___|\__|_|\___/|_| |_| |_____/ \__, |___/\__\___|_| |_| |_|
-                    __/ |                                                                                                       __/ |                      
-                    |___/                                                                                                       |___/                       
+                    __/ |                                                                                                       __/ |
+                    |___/                                                                                                       |___/
     """
     )
     print("Version: 1.0a")
