@@ -263,19 +263,15 @@ def top_clients():
 
     sort_clients = sorted(client_total.items(),
                           key=lambda x: x[1], reverse=True)
-    try:
-        print(list(sort_clients)[0][0] + ": " + str(list(sort_clients)[0][1]))
-    except:
-        print("There have been no sales today!")
-    try:
-        print(list(sort_clients)[1][0] + ": " + str(list(sort_clients)[1][1]))
-    except:
-        print("Only one client today!")
-    try:
-        print(list(sort_clients)[2][0] + ": " + str(list(sort_clients)[2][1]))
-    except:
-        print("Only two clients today!")
-    
+    count = 0
+    for x in sort_clients:
+        if count == 3:
+            break
+        print(list(sort_clients)[count][0] + ": " + str(list(sort_clients)[count][1]))
+        count = count + 1
+        
+    if len(sort_clients) < 3:
+        print("No more data available!")
     
 def second_lowest_sale():
     print('\n####Second Lowest Sale####')
@@ -302,9 +298,10 @@ def second_lowest_sale():
     sort_clients = sorted(client_total.items(),
                           key=lambda x: x[1], reverse=False)
 
-    print("Name and total of second lowest sale: ",
-          sort_clients[1][0], sort_clients[1][1])
-
+    try:
+        print("Name and total of second lowest sale: ", sort_clients[1][0], sort_clients[1][1])
+    except:
+        print("There is only one sale for the day, cannont display this section!")
 
 def todays_total_sales():
     print('\n####Todays total sales####')
