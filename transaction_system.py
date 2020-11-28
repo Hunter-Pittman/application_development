@@ -15,6 +15,7 @@ def main():
     db_check()
     while True:
         if client_limit():
+            ending_program()
             break
         else:
             pass
@@ -215,8 +216,8 @@ def top_burgers():
     for item in results:
         burger_list.append(item[count])
 
-    bugrer_tally = collections.Counter(burger_list)
-    best_burger = bugrer_tally.most_common(3)
+    burger_tally = collections.Counter(burger_list)
+    best_burger = burger_tally.most_common(3)
 
     while True:
         try:
@@ -302,9 +303,11 @@ def second_lowest_sale():
     sort_clients = sorted(client_total.items(),
                           key=lambda x: x[1], reverse=False)
 
-    print("Name and total of second lowest sale: ",
-          sort_clients[1][0], sort_clients[1][1])
-
+    try:
+        print("Name and total of second lowest sale: ",
+            sort_clients[1][0], sort_clients[1][1])
+    except:
+        print("There are not enough sales to display this information!")
 
 def todays_total_sales():
     print('\n####Todays total sales####')
@@ -355,11 +358,10 @@ def client_limit():
     results = select_todays_orders("first_name, last_name")
     clients_processed = len(results)
 
-    if clients_processed > 100:
+    if clients_processed >= 100:
         print(
             "You have reached the 100 clients that are permissible, displaying stats and ending program..."
         )
-        ending_program()
         return True
     else:
         print("Clients processed today: ", clients_processed)
